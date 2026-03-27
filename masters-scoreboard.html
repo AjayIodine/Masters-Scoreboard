@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Masters 2026 Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a4a2e;
+    --green-mid: #2d6b47;
+    --green-light: #3d8b5e;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #f5f0e6;
+    --cream-dark: #ede5d0;
+    --white: #faf8f3;
+    --text-dark: #1a1a1a;
+    --text-mid: #4a4a4a;
+    --text-light: #888;
+    --red: #b03030;
+    --cut: #8a5a00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--green);
+    color: var(--cream);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Augusta-inspired subtle pattern background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(61,139,94,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Azalea petal decorative element */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 28px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(201,168,76,0.4);
+  }
+
+  .title-block h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .title-block .subtitle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(245,240,230,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .tournament-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .tournament-status.live {
+    background: rgba(176,48,48,0.8);
+    color: white;
+  }
+
+  .tournament-status.live .dot {
+    width: 6px; height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1.2s infinite;
+  }
+
+  .tournament-status.upcoming {
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .tournament-status.final {
+    background: rgba(255,255,255,0.08);
+    color: rgba(245,240,230,0.5);
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .last-updated {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(245,240,230,0.3);
+    letter-spacing: 1px;
+  }
+
+  /* Augusta National logo-style badge */
+  .augusta-badge {
+    width: 48px;
+    height: 48px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  .augusta-badge svg {
+    width: 28px;
+    height: 28px;
+    fill: var(--green);
+  }
+
+  .title-area {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Round tabs */
+  .round-info {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .round-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(201,168,76,0.25);
+    color: rgba(245,240,230,0.45);
+    text-transform: uppercase;
+  }
+
+  .round-pill.active {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* Table */
+  .leaderboard-wrap {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .lb-header {
+    display: grid;
+    grid-template-columns: 52px 1fr 56px 56px 56px 56px 72px;
+    padding: 10px 18px;
+    background: rgba(201,168,76,0.1);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .lb-header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .lb-header span:not(:first-child) { text-align: center; }
+  .lb-header span:last-child { text-align: right; }
+
+  .lb-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 56px 56px 56px 56px 72px;
+    padding: 13px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: center;
+    opacity: 0;
+    animation: slideIn 0.35s forwards;
+    transition: background 0.2s;
+  }
+
+  .lb-row:last-child { border-bottom: none; }
+
+  .lb-row.top3 {
+    background: rgba(201,168,76,0.06);
+  }
+
+  .lb-row.cut-line {
+    border-top: 2px dashed rgba(138,90,0,0.5);
+    opacity: 0.6;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .pos {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: rgba(245,240,230,0.45);
+    font-weight: 600;
+  }
+
+  .pos.top3 { color: var(--gold); }
+  .pos.first { font-size: 18px; color: var(--gold-light); }
+
+  .player-info {}
+
+  .player-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.1;
+  }
+
+  .lb-row.top3 .player-name { color: var(--white); }
+
+  .player-country {
+    font-size: 11px;
+    color: rgba(245,240,230,0.4);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    font-weight: 300;
+  }
+
+  .score-cell {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .score-total {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .under { color: #5dba7e; }
+  .over { color: #d97070; }
+  .even { color: var(--cream); }
+
+  .score-cell.round { color: rgba(245,240,230,0.55); font-size: 13px; }
+  .score-cell.thru { color: rgba(245,240,230,0.4); font-size: 12px; }
+
+  .score-cell:last-child { text-align: right; }
+
+  /* Countdown / Pre-tournament display */
+  .pre-tournament {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .countdown-grid {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 28px 0;
+  }
+
+  .countdown-unit {
+    text-align: center;
+  }
+
+  .countdown-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--gold-light);
+    line-height: 1;
+    display: block;
+  }
+
+  .countdown-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(245,240,230,0.4);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .countdown-sep {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    color: rgba(201,168,76,0.3);
+    align-self: flex-start;
+    padding-top: 4px;
+  }
+
+  .pre-tournament h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+  }
+
+  .pre-tournament p {
+    font-size: 14px;
+    color: rgba(245,240,230,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .favorites-section {
+    margin-top: 32px;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .fav-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 14px 12px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.4s forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(8px); }
+  }
+
+  .fav-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    color: var(--cream);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .fav-odds {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .fav-world-rank {
+    font-size: 10px;
+    color: rgba(245,240,230,0.35);
+    margin-top: 3px;
+    letter-spacing: 1px;
+  }
+
+  /* Augusta dates banner */
+  .dates-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 16px;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .dates-banner .date-item {
+    text-align: center;
+  }
+
+  .dates-banner .date-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+
+  .dates-banner .date-lbl {
+    font-size: 10px;
+    color: rgba(245,240,230,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .dates-banner .sep {
+    color: rgba(201,168,76,0.3);
+    font-size: 24px;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 48px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: rgba(245,240,230,0.4);
+    letter-spacing: 2px;
+  }
+
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid rgba(201,168,76,0.15);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="title-area">
+      <div class="augusta-badge">
+        <!-- Simplified flag/pin icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="11" y="2" width="1.5" height="20" fill="#1a4a2e"/>
+          <path d="M12.5 2 L20 6 L12.5 10 Z" fill="#1a4a2e"/>
+        </svg>
+      </div>
+      <div class="title-block">
+        <h1>The Masters</h1>
+        <div class="subtitle">Augusta National · 2026 Tournament</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="status-badge" class="tournament-status upcoming">APRIL 9–12, 2026</div>
+      <div class="last-updated" id="last-updated">—</div>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <div class="loading">
+      <div class="spinner"></div>
+      LOADING...
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const MASTERS_START = new Date('2026-04-09T08:00:00-04:00');
+  const MASTERS_END   = new Date('2026-04-12T20:00:00-04:00');
+
+  // ESPN tournament ID for Masters 2026
+  // We'll try to find it dynamically, fallback to known ID pattern
+  const ESPN_MASTERS_ID = '401703498'; // Will attempt dynamic lookup too
+
+  function scoreColor(score, str) {
+    if (str === 'E' || score === 0) return 'even';
+    if (score < 0) return 'under';
+    return 'over';
+  }
+
+  function formatScore(val) {
+    if (val === null || val === undefined || val === 'E') return 'E';
+    const n = parseInt(val);
+    if (isNaN(n) || n === 0) return 'E';
+    return n > 0 ? `+${n}` : `${n}`;
+  }
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = MASTERS_START - now;
+    if (diff <= 0) return null;
+
+    const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { days, hours, minutes, seconds };
+  }
+
+  function renderPreTournament() {
+    const cd = updateCountdown();
+    const content = document.getElementById('main-content');
+
+    const favs = [
+      { name: 'Scottie Scheffler',    odds: '+300',  rank: 'World #1' },
+      { name: 'Rory McIlroy',         odds: '+900',  rank: 'World #2' },
+      { name: 'Xander Schauffele',    odds: '+1200', rank: 'World #3' },
+      { name: 'Collin Morikawa',      odds: '+1400', rank: 'World #4' },
+      { name: 'Jon Rahm',             odds: '+1600', rank: 'World #5' },
+    ];
+
+    const favCards = favs.map((f, i) => `
+      <div class="fav-card" style="animation-delay:${i * 0.08}s">
+        <div class="fav-name">${f.name}</div>
+        <div class="fav-odds">${f.odds}</div>
+        <div class="fav-world-rank">${f.rank}</div>
+      </div>
+    `).join('');
+
+    content.innerHTML = `
+      <div class="pre-tournament">
+        <div class="dates-banner">
+          <div class="date-item">
+            <div class="date-val">APR 9</div>
+            <div class="date-lbl">Round 1</div>
+          </div>
+          <div class="sep">—</div>
+          <div class="date-item">
+            <div class="date-val">APR 12</div>
+            <div class="date-lbl">Final Round</div>
+          </div>
+          <div class="sep">·</div>
+          <div class="date-item">
+            <div class="date-val">Augusta</div>
+            <div class="date-lbl">National GC · Par 72</div>
+          </div>
+        </div>
+
+        ${cd ? `
+        <p style="margin-bottom:8px">Tournament begins in</p>
+        <div class="countdown-grid" id="countdown-grid">
+          <div class="countdown-unit">
+            <span class="countdown-number" id="cd-days">${String(cd.days).padStart(2,'0')}</span>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit">
+            <span class="countdown-number" id="cd-hours">${String(cd.hours).padStart(2,'0')}</span>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit">
+            <span class="countdown-number" id="cd-mins">${String(cd.minutes).padStart(2,'0')}</span>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit">
+            <span class="countdown-number" id="cd-secs">${String(cd.seconds).padStart(2,'0')}</span>
+            <div class="countdown-label">Seconds</div>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="favorites-section">
+          <div class="section-label">Early Favorites</div>
+          <div class="favorites-grid">${favCards}</div>
+        </div>
+      </div>
+    `;
+
+    // Live countdown tick
+    if (cd) {
+      setInterval(() => {
+        const t = updateCountdown();
+        if (!t) { fetchData(); return; }
+        const el = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = String(val).padStart(2,'0'); };
+        el('cd-days', t.days); el('cd-hours', t.hours); el('cd-mins', t.minutes); el('cd-secs', t.seconds);
+      }, 1000);
+    }
+  }
+
+  function renderLeaderboard(players, roundInfo) {
+    const content = document.getElementById('main-content');
+
+    // Round pills
+    const rounds = ['R1','R2','R3','R4'];
+    const currentRound = roundInfo?.currentRound || 1;
+    const roundPills = rounds.map((r, i) => `
+      <div class="round-pill ${i+1 <= currentRound ? 'active' : ''}">${r}</div>
+    `).join('');
+
+    const top10 = players.slice(0, 10);
+
+    const rows = top10.map((p, i) => {
+      const totalScore = p.totalScore;
+      const scoreStr = formatScore(totalScore);
+      const colorClass = scoreColor(totalScore, scoreStr);
+      const isTop3 = i < 3;
+
+      const r1 = p.rounds?.[0] ?? '—';
+      const r2 = p.rounds?.[1] ?? '—';
+      const r3 = p.rounds?.[2] ?? '—';
+      const r4 = p.rounds?.[3] ?? '—';
+
+      const currentRoundScore = p.currentRoundScore != null ? formatScore(p.currentRoundScore) : '—';
+      const thru = p.thru || '';
+
+      const posDisplay = p.position || (i + 1);
+
+      return `
+        <div class="lb-row ${isTop3 ? 'top3' : ''}" style="animation-delay:${i * 0.05}s">
+          <div class="pos ${isTop3 ? 'top3' : ''} ${i === 0 ? 'first' : ''}">${posDisplay}</div>
+          <div class="player-info">
+            <div class="player-name">${p.name}</div>
+            <div class="player-country">${p.country || ''}</div>
+          </div>
+          <div class="score-total ${colorClass}">${scoreStr}</div>
+          <div class="score-cell round">${r1 !== '—' ? r1 : '—'}</div>
+          <div class="score-cell round">${r2 !== '—' ? r2 : '—'}</div>
+          <div class="score-cell round">${r3 !== '—' ? r3 : '—'}</div>
+          <div class="score-cell thru">${thru ? thru : (currentRoundScore !== '—' ? currentRoundScore : '—')}</div>
+        </div>
+      `;
+    }).join('');
+
+    content.innerHTML = `
+      <div class="round-info">${roundPills}
+        ${roundInfo?.status ? `<span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(245,240,230,0.4);letter-spacing:1px;">${roundInfo.status}</span>` : ''}
+      </div>
+      <div class="leaderboard-wrap">
+        <div class="lb-header">
+          <span>POS</span><span>PLAYER</span><span>TOTAL</span><span>R1</span><span>R2</span><span>R3</span><span>THRU</span>
+        </div>
+        ${rows}
+      </div>
+    `;
+  }
+
+  async function fetchESPNLeaderboard() {
+    // ESPN has an undocumented but reliable golf leaderboard endpoint
+    const url = `https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Find Masters event
+    const events = data.events || [];
+    const masters = events.find(e =>
+      e.name?.toLowerCase().includes('masters') ||
+      e.shortName?.toLowerCase().includes('masters')
+    );
+
+    if (!masters) return null;
+
+    const competition = masters.competitions?.[0];
+    if (!competition) return null;
+
+    const competitors = competition.competitors || [];
+    const status = competition.status?.type?.description || '';
+    const currentRound = competition.status?.period || 1;
+
+    const players = competitors
+      .sort((a, b) => (parseInt(a.status?.position?.id) || 999) - (parseInt(b.status?.position?.id) || 999))
+      .map(c => {
+        const athlete = c.athlete || {};
+        const linescores = c.linescores || [];
+
+        // Total score relative to par
+        const totalScore = c.score != null ? parseInt(c.score) : null;
+        const toPar = c.statistics?.find(s => s.name === 'toPar')?.displayValue;
+        const toParNum = toPar ? (toPar === 'E' ? 0 : parseInt(toPar)) : totalScore;
+
+        // Round scores
+        const rounds = linescores.map(ls => ls.value ?? ls.displayValue ?? '—');
+
+        return {
+          name: athlete.displayName || athlete.fullName || 'Unknown',
+          country: athlete.flag?.alt || athlete.nationality || '',
+          position: c.status?.position?.displayName || c.status?.position?.id || '',
+          totalScore: toParNum,
+          rounds,
+          thru: c.status?.thru || c.status?.position?.displayName || '',
+          currentRoundScore: null,
+        };
+      });
+
+    return {
+      players,
+      roundInfo: {
+        currentRound,
+        status,
+      }
+    };
+  }
+
+  async function fetchData() {
+    const now = new Date();
+    const badge = document.getElementById('status-badge');
+    const updEl = document.getElementById('last-updated');
+
+    // Before tournament
+    if (now < MASTERS_START) {
+      badge.className = 'tournament-status upcoming';
+      badge.textContent = 'APRIL 9–12, 2026';
+      renderPreTournament();
+      return;
+    }
+
+    // After tournament
+    if (now > MASTERS_END) {
+      badge.className = 'tournament-status final';
+      badge.textContent = 'TOURNAMENT COMPLETE';
+    } else {
+      badge.className = 'tournament-status live';
+      badge.innerHTML = '<span class="dot"></span> LIVE';
+    }
+
+    try {
+      const result = await fetchESPNLeaderboard();
+      if (result && result.players.length > 0) {
+        renderLeaderboard(result.players, result.roundInfo);
+        updEl.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      } else {
+        // ESPN returned no data yet — show countdown still
+        renderPreTournament();
+      }
+    } catch (err) {
+      // Fallback: show pre-tournament if fetch fails
+      renderPreTournament();
+      updEl.textContent = 'Data unavailable';
+    }
+  }
+
+  fetchData();
+  setInterval(fetchData, 60000);
+</script>
+</body>
+</html>
